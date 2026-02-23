@@ -40,7 +40,7 @@ ASSETS = [
     {"name": "MSCI EM IMI", "ticker": "EIMI.L",  "source": "yahoo", "currency": "USD",
      "bossa_ticker": "EIMI", "bossa_exchange": "LSE (London)",   "bossa_currency": "USD"},
     {"name": "Gold",        "ticker": "IGLN.L",  "source": "yahoo", "currency": "USD",
-     "bossa_ticker": "IGLN", "bossa_exchange": "LSE (London)",   "bossa_currency": "USD"},
+     "bossa_ticker": "EGLN", "bossa_exchange": "LSE (London)",   "bossa_currency": "EUR"},
     {"name": "mWIG40 TR",   "ticker": "mwig40tr","source": "stooq", "currency": "PLN",
      "bossa_ticker": "ETFBM40TR", "bossa_exchange": "GPW (Warszawa)", "bossa_currency": "PLN"},
 ]

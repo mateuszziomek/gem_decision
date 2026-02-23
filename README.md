@@ -17,7 +17,7 @@ Narzędzie do kwartalnej/miesięcznej decyzji inwestycyjnej w ramach strategii *
 | S&P 500 | SPXS | Euronext Amsterdam | EUR |
 | NASDAQ 100 | CNDX | Euronext Amsterdam | EUR |
 | MSCI EM IMI | EIMI | LSE London | USD |
-| Gold | IGLN | LSE London | USD |
+| Gold | EGLN | LSE London | EUR |
 | mWIG40 TR | ETFBM40TR | GPW Warszawa | PLN |
 | US Treasury 0-1yr (risk-off) | IB01 | LSE London | USD |
 
