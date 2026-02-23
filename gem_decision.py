@@ -38,7 +38,7 @@ ASSETS = [
     {"name": "NASDAQ 100",  "ticker": "CNDX.L",  "source": "yahoo", "currency": "USD",
      "bossa_ticker": "CNDX", "bossa_exchange": "AMS (Euronext)", "bossa_currency": "EUR"},
     {"name": "MSCI EM IMI", "ticker": "EIMI.L",  "source": "yahoo", "currency": "USD",
-     "bossa_ticker": "EIMI", "bossa_exchange": "LSE (London)",   "bossa_currency": "USD"},
+     "bossa_ticker": "EMIM", "bossa_exchange": "AMS (Euronext)", "bossa_currency": "EUR"},
     {"name": "Gold",        "ticker": "IGLN.L",  "source": "yahoo", "currency": "USD",
      "bossa_ticker": "EGLN", "bossa_exchange": "LSE (London)",   "bossa_currency": "EUR"},
     {"name": "mWIG40 TR",   "ticker": "mwig40tr","source": "stooq", "currency": "PLN",
