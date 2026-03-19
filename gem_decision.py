@@ -77,6 +77,29 @@ FX_SANITY_BOUNDS = {
 # VALIDATION
 # ═══════════════════════════════════════════════════════════════════════
 
+def validate_ticker_currencies(assets: list[dict], risk_off: dict) -> None:
+    """Verify Yahoo tickers report expected currency. Exit on mismatch."""
+    yahoo_assets = [a for a in assets if a["source"] == "yahoo"] + [risk_off]
+    tickers_str = " ".join(a["ticker"] for a in yahoo_assets)
+    expected = {a["ticker"]: a["currency"] for a in yahoo_assets}
+
+    batch = yf.Tickers(tickers_str)
+    for ticker, exp_currency in expected.items():
+        try:
+            info = batch.tickers[ticker].info
+            actual_currency = info.get("currency")
+        except Exception:
+            actual_currency = None
+
+        if actual_currency is None:
+            print(f"⚠️  Currency check: {ticker} — unable to determine currency", file=sys.stderr)
+            continue
+        if actual_currency != exp_currency:
+            print(f"❌ Currency mismatch: {ticker} reports {actual_currency}, "
+                  f"expected {exp_currency}", file=sys.stderr)
+            sys.exit(1)
+
+
 def validate_fx_rates(fx_data: dict[str, pd.Series]) -> None:
     """Check all FX rate values fall within sane bounds. Exit on violation."""
     for currency, series in fx_data.items():
@@ -387,6 +410,9 @@ def main():
             fx_needed.add(FX_TICKERS[a["currency"]])
 
     all_yahoo = yahoo_tickers + list(fx_needed)
+
+    print("🔍 Sprawdzanie walut tickerów Yahoo...")
+    validate_ticker_currencies(ASSETS, RISK_OFF)
 
     print(f"📡 Pobieranie danych z Yahoo Finance: {', '.join(all_yahoo)}...")
     yahoo_closes = fetch_yahoo_close(all_yahoo, start_date, end_date)
