@@ -67,6 +67,35 @@ DATA_GAP_WARN_START = 15   # warn if start-date data is >15 days off
 DATA_GAP_WARN_END = 7      # warn if end-date data is >7 days off
 DATA_GAP_FATAL = 60        # exit if any data point is >60 days off
 
+# FX sanity bounds — exit if any rate falls outside these ranges
+FX_SANITY_BOUNDS = {
+    "USDPLN=X": (2.0, 7.0),
+}
+
+
+# ═══════════════════════════════════════════════════════════════════════
+# VALIDATION
+# ═══════════════════════════════════════════════════════════════════════
+
+def validate_fx_rates(fx_data: dict[str, pd.Series]) -> None:
+    """Check all FX rate values fall within sane bounds. Exit on violation."""
+    for currency, series in fx_data.items():
+        fx_ticker = FX_TICKERS.get(currency)
+        if fx_ticker is None or fx_ticker not in FX_SANITY_BOUNDS:
+            continue
+        lo, hi = FX_SANITY_BOUNDS[fx_ticker]
+        clean = series.dropna()
+        if clean.empty:
+            print(f"❌ FX sanity check: {fx_ticker} has no data", file=sys.stderr)
+            sys.exit(1)
+        out_of_bounds = clean[(clean < lo) | (clean > hi)]
+        if not out_of_bounds.empty:
+            worst = out_of_bounds.iloc[0]
+            date = out_of_bounds.index[0]
+            print(f"❌ FX sanity check: {fx_ticker} = {worst:.4f} on {date.date()} "
+                  f"outside bounds [{lo}, {hi}]", file=sys.stderr)
+            sys.exit(1)
+
 
 # ═══════════════════════════════════════════════════════════════════════
 # DATE HELPERS
@@ -376,6 +405,8 @@ def main():
             fx_data[currency] = yahoo_closes[fx_ticker].dropna()
         else:
             print(f"⚠️  FX data for {currency} ({fx_ticker}) not found.", file=sys.stderr)
+
+    validate_fx_rates(fx_data)
 
     # ── Compute returns for each asset ──────────────────────────────────
     print()
