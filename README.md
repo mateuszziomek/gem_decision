@@ -10,6 +10,19 @@ Narzędzie do kwartalnej/miesięcznej decyzji inwestycyjnej w ramach strategii *
 4. Jeśli najlepsze aktywo ≤ 0% → **RISK-OFF** (obligacje US Treasury)
 5. Cały kapitał w jednym aktywie — zero dywersyfikacji wewnątrz strategii
 
+## Roznice vs. klasyczny GEM
+
+Ten tool implementuje **zmodyfikowaną** wersję GEM. Kluczowe roznice:
+
+| Aspekt | Klasyczny GEM (Antonacci) | Nasza wersja |
+|--------|--------------------------|--------------|
+| Absolute momentum | Sprawdza S&P 500 vs T-bills | Sprawdza najlepsze aktywo z calego rankingu |
+| Risk-off trigger | S&P 500 < T-bills → risk-off | Dopiero gdy **wszystkie** aktywa < 0% |
+| Uniwersum | US equity + int'l equity + bonds | 5 klas aktywow (equity US/EM, gold, mWIG40) |
+| Waluta bazowa | USD | PLN (z przeliczeniem FX) |
+
+**Skutek:** Nasza wersja jest bardziej agresywna — risk-off wlacza sie rzadziej, bo wystarczy ze jedno aktywo ma pozytywny momentum.
+
 ## Uniwersum aktywów
 
 | Aktywo | Ticker Bossa | Giełda | Waluta |

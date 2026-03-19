@@ -290,6 +290,11 @@ def make_decision(ranking: list[dict]) -> dict:
     """
     Apply GEM decision rules.
 
+    NOTE: This deviates from Antonacci's original GEM. Classic GEM checks
+    absolute momentum on a single US equity benchmark (e.g. S&P 500 vs T-bills).
+    Here we check whether the BEST asset in the full ranking has positive return —
+    risk-off triggers only when ALL assets are negative. This is more aggressive.
+
     Returns dict with 'action' ('BUY' or 'RISK_OFF'), 'asset', 'return_pct'.
     """
     # Filter out assets with NaN returns
