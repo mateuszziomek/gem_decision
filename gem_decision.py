@@ -72,6 +72,9 @@ FX_SANITY_BOUNDS = {
     "USDPLN=X": (2.0, 7.0),
 }
 
+# Whipsaw protection: warn when margin between #1 and #2 is narrow
+NARROW_MARGIN_PCT = 2.0
+
 
 # ═══════════════════════════════════════════════════════════════════════
 # VALIDATION
@@ -542,6 +545,15 @@ def main():
         print(f"   Waluta:  {RISK_OFF['bossa_currency']}")
     else:
         print("❌ DECYZJA: BRAK DANYCH — nie można podjąć decyzji")
+
+    # ── Whipsaw warning ──────────────────────────────────────────────
+    valid_ranking = [r for r in ranking if not pd.isna(r["return_pct"])]
+    if len(valid_ranking) >= 2:
+        spread = abs(valid_ranking[0]["return_pct"] - valid_ranking[1]["return_pct"])
+        if spread < NARROW_MARGIN_PCT:
+            print(f"\n⚠️  UWAGA: Roznica miedzy #{1} ({valid_ranking[0]['name']}) "
+                  f"a #{2} ({valid_ranking[1]['name']}) wynosi tylko {spread:.2f}pp.")
+            print(f"   Rozważ czy zmiana pozycji jest warta kosztow transakcyjnych.")
 
     if usdpln_start and usdpln_end:
         print(f"\n💱 Kontekst walutowy:")
