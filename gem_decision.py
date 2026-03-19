@@ -62,6 +62,11 @@ STOOQ_CSV_URL = "https://stooq.pl/q/d/l/?s={symbol}&i=d"
 # Decision log path
 DECISION_LOG = Path(__file__).parent / "decision_log.csv"
 
+# Data coverage: max gap (days) between requested and actual date
+DATA_GAP_WARN_START = 15   # warn if start-date data is >15 days off
+DATA_GAP_WARN_END = 7      # warn if end-date data is >7 days off
+DATA_GAP_FATAL = 60        # exit if any data point is >60 days off
+
 
 # ═══════════════════════════════════════════════════════════════════════
 # DATE HELPERS
@@ -164,12 +169,30 @@ def _pick_close_col(df: pd.DataFrame) -> str:
 # PRICE HELPERS
 # ═══════════════════════════════════════════════════════════════════════
 
-def last_price_on_or_before(series: pd.Series, target: pd.Timestamp) -> float:
-    """Get the last available value on or before target date."""
+def last_price_on_or_before(series: pd.Series, target: pd.Timestamp) -> tuple[float, pd.Timestamp | None]:
+    """Get the last available value on or before target date.
+
+    Returns (price, actual_date) tuple. actual_date is None when no data found.
+    """
     subset = series.loc[:target].dropna()
     if subset.empty:
-        return float("nan")
-    return float(subset.iloc[-1])
+        return float("nan"), None
+    return float(subset.iloc[-1]), subset.index[-1]
+
+
+def _check_data_gap(label: str, requested: pd.Timestamp, actual: pd.Timestamp | None, warn_days: int) -> None:
+    """Check gap between requested and actual data date; warn or exit."""
+    if actual is None:
+        print(f"❌ {label}: no data found on or before {requested.date()}", file=sys.stderr)
+        sys.exit(1)
+    gap = abs((requested - actual).days)
+    if gap > DATA_GAP_FATAL:
+        print(f"❌ {label}: data gap {gap} days (requested {requested.date()}, "
+              f"got {actual.date()}) exceeds {DATA_GAP_FATAL}-day limit", file=sys.stderr)
+        sys.exit(1)
+    if gap > warn_days:
+        print(f"⚠️  {label}: data gap {gap} days (requested {requested.date()}, "
+              f"got {actual.date()})", file=sys.stderr)
 
 
 def compute_return_pln(
@@ -193,8 +216,12 @@ def compute_return_pln(
 
     pln_series = pln_series.dropna()
 
-    start_price = last_price_on_or_before(pln_series, start)
-    end_price = last_price_on_or_before(pln_series, end)
+    start_price, start_actual = last_price_on_or_before(pln_series, start)
+    end_price, end_actual = last_price_on_or_before(pln_series, end)
+
+    series_name = price_series.name or "unknown"
+    _check_data_gap(f"{series_name} start", start, start_actual, DATA_GAP_WARN_START)
+    _check_data_gap(f"{series_name} end", end, end_actual, DATA_GAP_WARN_END)
 
     if pd.isna(start_price) or pd.isna(end_price) or start_price == 0:
         return {"start_pln": start_price, "end_pln": end_price, "return_pct": float("nan")}
@@ -411,8 +438,8 @@ def main():
     # ── FX context ──────────────────────────────────────────────────────
     usdpln_start, usdpln_end, usdpln_change = None, None, None
     if "USD" in fx_data:
-        usdpln_start = last_price_on_or_before(fx_data["USD"], start_date)
-        usdpln_end = last_price_on_or_before(fx_data["USD"], end_date)
+        usdpln_start, _ = last_price_on_or_before(fx_data["USD"], start_date)
+        usdpln_end, _ = last_price_on_or_before(fx_data["USD"], end_date)
         if usdpln_start and usdpln_end:
             usdpln_change = (usdpln_end / usdpln_start - 1) * 100.0
 
