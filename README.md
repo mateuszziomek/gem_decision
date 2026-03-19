@@ -63,9 +63,9 @@ python gem_decision.py --no-log
 🎯 DECYZJA: KUP Gold — momentum +44.23%
 
 🏦 Jak kupić na Bossa:
-   Ticker:  IGLN
+   Ticker:  EGLN
    Giełda:  LSE (London)
-   Waluta:  USD
+   Waluta:  EUR
 ```
 
 ## Rutyna
